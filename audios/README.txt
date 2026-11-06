@@ -1,0 +1,1 @@
+Aquí se guardarán las grabaciones MP3 que se asociarán a cada imagen reconocida.\n
