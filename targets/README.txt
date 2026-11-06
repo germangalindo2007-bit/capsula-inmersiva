@@ -1,0 +1,1 @@
+Aquí se añadirá targets.mind generado a partir de las imágenes impresas. El orden de los marcadores debe coincidir con los índices configurados en la aplicación.\n
