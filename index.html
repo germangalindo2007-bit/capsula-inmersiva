@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080d13">
+  <title>Protocolo de supervivencia</title>
+  <style>
+    :root{--bg:#080d13;--panel:#111a23;--line:#344452;--text:#edf3f6;--muted:#9eacb6;--red:#ff594f;--green:#9ce6b7}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 50% -15%,#263746 0,#080d13 52%);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+    header{padding:22px 18px 17px;border-bottom:1px solid var(--line);background:#080d13cc}
+    .eyebrow{font:700 10px monospace;letter-spacing:.2em;color:var(--red)} h1{font:800 clamp(22px,5vw,34px) monospace;letter-spacing:.035em;margin:9px 0 5px}
+    .sub{font:11px monospace;color:var(--muted);letter-spacing:.1em}
+    main{max-width:780px;margin:auto;padding:16px}
+    .panel{background:linear-gradient(145deg,#15212b,#0d141c);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 12px 32px #0005}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:10px}.label{font:700 12px monospace;letter-spacing:.08em}
+    .status{font:11px monospace;color:var(--muted)} .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#687580;margin-right:7px}.dot.on{background:var(--green);box-shadow:0 0 10px var(--green)}.dot.err{background:var(--red)}
+    #message{font:15px/1.5 monospace;margin:13px 0 5px} #detail{font:12px/1.5 monospace;color:var(--muted)}
+    button{width:100%;min-height:46px;padding:12px 14px;border-radius:8px;border:1px solid var(--red);background:#4a211f;color:#fff;font:700 12px monospace;letter-spacing:.08em;cursor:pointer}
+    button.secondary{margin-top:9px;border-color:var(--line);background:#18232d}button:disabled{opacity:.45;cursor:not-allowed}
+    #camera-wrap{display:none;position:relative;background:#020406;border:1px solid var(--line);border-radius:9px;overflow:hidden;aspect-ratio:4/3;margin-top:12px}
+    video{width:100%;height:100%;object-fit:cover;display:block} #camera-hint{position:absolute;bottom:10px;left:10px;right:10px;padding:8px;background:#000a;border:1px solid #ffffff30;border-radius:6px;text-align:center;font:11px monospace}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.target{border:1px solid var(--line);border-radius:8px;padding:12px;background:#0d151d;color:var(--muted);font:11px/1.5 monospace}.target b{display:block;color:var(--text);margin-bottom:5px}.target.active{border-color:var(--green);background:#11251b}.target.active b{color:var(--green)}
+    .notice{border-left:3px solid var(--red);padding:10px 12px;background:#211817;color:#c6b8b6;font:11px/1.6 monospace}
+    footer{text-align:center;color:#64727d;font:10px monospace;padding:8px 16px 24px;letter-spacing:.08em}
+    @media(max-width:420px){main{padding:11px}.panel{padding:13px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">UNIDAD DE SUPERVIVENCIA · REGISTRO 001</div>
+  <h1>PROTOCOLO DE SUPERVIVENCIA</h1>
+  <div class="sub">CÁPSULA DE EYECCIÓN // ESTADO: INESTABLE</div>
+</header>
+<main>
+  <section class="panel">
+    <div class="row"><div class="label">ESTADO DEL SISTEMA</div><div class="status"><span id="dot" class="dot"></span><span id="status">EN ESPERA</span></div></div>
+    <div id="message">Sistema preparado. Inicia la misión para activar la cámara.</div>
+    <div id="detail">El dispositivo funcionará como visor de exploración de la cápsula.</div>
+  </section>
+
+  <section class="panel">
+    <div class="label" style="margin-bottom:12px">CONTROL DE MISIÓN</div>
+    <button id="start">INICIAR MISIÓN · ACTIVAR CÁMARA</button>
+    <button id="stop" class="secondary" disabled>DETENER CÁMARA</button>
+  </section>
+
+  <section class="panel">
+    <div class="label">REGISTRO DE OBJETIVOS</div>
+    <div class="grid">
+      <div class="target" id="target-0"><b>OBJETIVO 01</b>Imagen pendiente de asignación</div>
+      <div class="target" id="target-1"><b>OBJETIVO 02</b>Imagen pendiente de asignación</div>
+      <div class="target" id="target-2"><b>OBJETIVO 03</b>Imagen pendiente de asignación</div>
+      <div class="target" id="target-3"><b>OBJETIVO 04</b>Imagen pendiente de asignación</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="label">VISOR ÓPTICO</div>
+    <div id="camera-wrap">
+      <video id="camera" playsinline autoplay muted></video>
+      <div id="camera-hint">VISOR ACTIVO · ESPERANDO MARCADORES</div>
+    </div>
+    <p id="camera-note" style="font:11px/1.6 monospace;color:var(--muted);margin:10px 0 0">La cámara se activará al iniciar. El reconocimiento de imágenes se conectará cuando incorporemos los marcadores.</p>
+  </section>
+
+  <div class="notice"><b>ESTADO DEL PROTOTIPO:</b> cámara e interfaz preparadas. El reconocimiento de imágenes y la activación de grabaciones se habilitarán al incorporar el archivo de marcadores y los audios definitivos.</div>
+</main>
+<footer>ACCESO DE TRIPULACIÓN · SISTEMA DE ENTRENAMIENTO</footer>
+<script>
+(() => {
+  const video=document.getElementById('camera');
+  const start=document.getElementById('start');
+  const stop=document.getElementById('stop');
+  const wrap=document.getElementById('camera-wrap');
+  const dot=document.getElementById('dot');
+  const status=document.getElementById('status');
+  const message=document.getElementById('message');
+  const detail=document.getElementById('detail');
+  let stream=null;
+
+  function setState(label,title,description,state=''){
+    status.textContent=label; message.textContent=title; detail.textContent=description;
+    dot.className='dot'+(state?' '+state:'');
+  }
+  async function stopCamera(){
+    if(stream){stream.getTracks().forEach(track=>track.stop());stream=null;}
+    video.srcObject=null; wrap.style.display='none';
+    start.disabled=false; stop.disabled=true;
+  }
+  start.addEventListener('click',async()=>{
+    start.disabled=true;
+    setState('SOLICITANDO ACCESO','Conectando con el visor óptico…','Acepta el permiso de cámara cuando el navegador lo solicite.');
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'}}});
+      video.srcObject=stream; await video.play(); wrap.style.display='block'; stop.disabled=false;
+      setState('CÁMARA ACTIVA','Visor óptico conectado.','La cámara funciona. El escaneo de imágenes se habilitará cuando agreguemos los marcadores.','on');
+      document.getElementById('camera-note').textContent='Cámara trasera activa. Mantén el teléfono estable y apunta hacia las imágenes cuando estén instaladas.';
+    }catch(error){
+      console.error(error); start.disabled=false;
+      setState('ERROR DE CÁMARA','No se pudo iniciar el visor.','Abre el enlace publicado mediante HTTPS y permite el acceso a la cámara. '+(error.message||''),'err');
+    }
+  });
+  stop.addEventListener('click',async()=>{
+    await stopCamera();
+    setState('EN ESPERA','Visor óptico detenido.','Puedes iniciar la misión nuevamente.');
+  });
+  window.addEventListener('pagehide',stopCamera);
+})();
+</script>
+</body>
+</html>
